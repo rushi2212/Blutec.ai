@@ -1,17 +1,25 @@
-import { createServer } from 'node:http';
-import { createReadStream, existsSync, statSync } from 'node:fs';
-import { extname, join, normalize } from 'node:path';
+import express from 'express';
 import { fileURLToPath } from 'node:url';
-
-const root = fileURLToPath(new URL('.', import.meta.url));
-const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json; charset=utf-8', '.webp':'image/webp', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.png':'image/png', '.svg':'image/svg+xml' };
-const server = createServer((req, res) => {
-  const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-  let file = normalize(join(root, pathname));
-  if (!file.startsWith(root)) { res.writeHead(403).end('Forbidden'); return; }
-  if (!existsSync(file) || statSync(file).isDirectory()) file = join(root, 'index.html');
-  res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
-  createReadStream(file).pipe(res);
+import path from 'node:path';
+import fs from 'node:fs';
+const app = express();
+const here = path.dirname(fileURLToPath(import.meta.url));
+const dist = path.join(here, 'dist');
+app.use(express.json({ limit: '32kb' }));
+app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'TeddyPups website' }));
+app.post('/api/inquiries', (req, res) => {
+  const { name, phone, email, city, interest, message, website } = req.body || {};
+  if (website) return res.json({ ok: true });
+  if (!name?.trim() || !phone?.trim() || !email?.trim() || !city?.trim() || !interest?.trim()) return res.status(400).json({ error: 'Please fill in your name, phone, email, location and puppy interest.' });
+  if (!/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({ error: 'Please enter a valid email address.' });
+  // The static clone confirms submitted enquiries locally; it does not send or retain personal information.
+  res.status(201).json({ ok: true, received: Boolean(message) });
 });
-const port = Number(process.env.PORT || 4173);
-server.listen(port, '0.0.0.0', () => console.log(`TeddyPups clone running at http://localhost:${port}`));
+if (fs.existsSync(dist)) {
+  app.use(express.static(dist));
+  app.get('*path', (_req, res) => res.sendFile(path.join(dist, 'index.html')));
+} else {
+  app.get('/', (_req, res) => res.status(200).send('TeddyPups Node API is ready. Run npm run dev for the React site.'));
+}
+const port = Number(process.env.PORT || 3001);
+app.listen(port, '0.0.0.0', () => console.log(`TeddyPups server listening on http://localhost:${port}`));
