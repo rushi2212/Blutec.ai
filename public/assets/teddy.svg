@@ -1,12 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 200" role="img" aria-labelledby="title">
 <title id="title">Teddy the TeddyPups puppy</title>
 <defs><linearGradient id="fur" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffdc83"/><stop offset="1" stop-color="#e9a64c"/></linearGradient><linearGradient id="basket" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e6b263"/><stop offset="1" stop-color="#bb7a38"/></linearGradient></defs>
+<style>
+#teddy-root{transform-box:fill-box;transform-origin:50% 66%;animation:teddy-breathe 3.8s ease-in-out infinite}
+.teddy-open{animation:teddy-open 6.2s ease infinite}.teddy-shut{opacity:0;animation:teddy-shut 6.2s ease infinite}
+.teddy-ear-right{transform-box:view-box;transform-origin:138px 55px;animation:teddy-ear 7.4s ease-in-out 2.2s infinite}
+@keyframes teddy-breathe{50%{scale:1 1.014}}
+@keyframes teddy-open{0%,92%,97%,100%{opacity:1}94.5%{opacity:0}}
+@keyframes teddy-shut{0%,92%,97%,100%{opacity:0}94.5%{opacity:1}}
+@keyframes teddy-ear{0%,84%,100%{rotate:0deg}87%{rotate:-11deg}90%{rotate:5deg}93%{rotate:-2deg}}
+@media(prefers-reduced-motion:reduce){#teddy-root,.teddy-open,.teddy-shut,.teddy-ear-right{animation:none!important}}
+</style>
 <ellipse cx="90" cy="190" rx="76" ry="7" fill="#28170f" opacity=".16"/>
-<g stroke="#28170f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-<path d="M42 70C25 68 20 49 33 38c9-8 25-4 32 9M138 70c17-2 22-21 9-32-9-8-25-4-32 9" fill="url(#fur)"/>
+<g id="teddy-root" stroke="#28170f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+<path d="M42 70C25 68 20 49 33 38c9-8 25-4 32 9" fill="url(#fur)"/><path class="teddy-ear-right" d="M138 70c17-2 22-21 9-32-9-8-25-4-32 9" fill="url(#fur)"/>
 <path d="M34 86c0-35 24-59 56-59s56 24 56 59c0 32-21 52-56 52S34 118 34 86z" fill="url(#fur)"/>
 <path d="M70 38c-13-8-6-22 7-18 4-15 21-14 23 0 14-7 23 6 11 17 14 1 16 16 1 20-9 2-15-4-23-4s-14 6-23 4c-15-3-13-18 4-19z" fill="#ffd985"/>
-<ellipse cx="68" cy="82" rx="7" ry="9" fill="#28170f" stroke="none"/><ellipse cx="112" cy="82" rx="7" ry="9" fill="#28170f" stroke="none"/><circle cx="66" cy="79" r="2.2" fill="#fff" stroke="none"/><circle cx="110" cy="79" r="2.2" fill="#fff" stroke="none"/>
+<g class="teddy-open" stroke="none"><ellipse cx="68" cy="82" rx="7" ry="9" fill="#28170f"/><ellipse cx="112" cy="82" rx="7" ry="9" fill="#28170f"/><circle cx="66" cy="79" r="2.2" fill="#fff"/><circle cx="110" cy="79" r="2.2" fill="#fff"/></g><path class="teddy-shut" d="M60 84q8-7 16 0m28 0q8-7 16 0" fill="none" stroke="#28170f" stroke-width="4"/>
 <ellipse cx="90" cy="102" rx="20" ry="15" fill="#fff0d6" stroke-width="3"/><path d="M83 98c0-7 14-7 14 0 0 5-6 7-7 7s-7-2-7-7z" fill="#28170f" stroke="none"/><path d="M90 105c0 7-9 9-13 4m13-4c0 7 9 9 13 4" fill="none" stroke-width="2.5"/>
 <path d="M50 127c-11 5-18 13-19 25l22 9 14-22M130 127c11 5 18 13 19 25l-22 9-14-22" fill="#f5c36d"/>
 <path d="M29 151c32-10 90-10 122 0l-12 42H41z" fill="url(#basket)"/><path d="M27 150c0-8 126-8 126 0v7c0 10-126 10-126 0z" fill="#f3c777"/><path d="M49 159l6 34m20-34 2 34m22-34-2 34m22-34-6 34M35 173h109" fill="none" stroke="#9c642e" stroke-width="2.5"/>

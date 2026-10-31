@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom';
-import { renderRoute } from './legacy.js';
+import { pageTitle, renderRoute } from './legacy.js';
 import './styles.css';
 
 function Site() {
@@ -10,6 +10,7 @@ function Site() {
   const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem('teddypups-intro-seen'));
 
   useEffect(() => {
+    document.title = pageTitle(location.pathname);
     if (!showIntro) return;
     sessionStorage.setItem('teddypups-intro-seen', '1');
     const timer = window.setTimeout(() => setShowIntro(false), 2050);
@@ -22,10 +23,16 @@ function Site() {
     const toggleMenu = () => {
       const open = menu?.classList.toggle('open');
       button?.setAttribute('aria-expanded', String(Boolean(open)));
+      const label = button?.querySelector('.menu-label');
+      if (label) label.textContent = open ? 'Close' : 'Menu';
     };
     button?.addEventListener('click', toggleMenu);
     const closeMenu = event => {
-      if (menu && !menu.contains(event.target) && !button?.contains(event.target)) menu.classList.remove('open');
+      if (menu && !menu.contains(event.target) && !button?.contains(event.target)) {
+        menu.classList.remove('open');
+        button?.setAttribute('aria-expanded', 'false');
+        button.querySelector('.menu-label').textContent = 'Menu';
+      }
     };
     document.addEventListener('click', closeMenu);
     const navigateClick = event => {
@@ -50,15 +57,37 @@ function Site() {
     };
     document.addEventListener('click', faqClick);
     const filterClick = event => {
-      const filterButton = event.target.closest('[data-filter]');
+      const filterButton = event.target.closest('[data-filter-type]');
       if (!filterButton) return;
+      const type = filterButton.dataset.filterType;
       const filter = filterButton.dataset.filter;
-      const url = new URL(location.pathname, window.location.origin);
-      if (filter !== 'All') url.searchParams.set('breed', filter);
+      const url = new URL(window.location.href);
+      if (filter) url.searchParams.set(type, filter); else url.searchParams.delete(type);
       window.history.pushState({}, '', url);
       window.dispatchEvent(new PopStateEvent('popstate'));
     };
     document.addEventListener('click', filterClick);
+    const wayTabs = [...document.querySelectorAll('[data-way-tab]')];
+    const selectWay = event => {
+      const tab = event.target.closest('[data-way-tab]');
+      if (!tab) return;
+      const way = tab.dataset.wayTab;
+      wayTabs.forEach(item => item.setAttribute('aria-selected', String(item === tab)));
+      document.querySelectorAll('[data-way-panel],[data-way-steps]').forEach(panel => { panel.hidden = panel.dataset.wayPanel !== way && panel.dataset.waySteps !== way; });
+    };
+    document.addEventListener('click', selectWay);
+    const faqSearch = document.getElementById('faqSearch');
+    const faqItems = [...document.querySelectorAll('[data-faq-item]')];
+    const faqCount = document.getElementById('faqCount');
+    const faqEmpty = document.querySelector('.faq-empty');
+    const searchFaq = () => {
+      const query = faqSearch?.value.trim().toLocaleLowerCase() || '';
+      let visible = 0;
+      faqItems.forEach(item => { const match = item.innerText.toLocaleLowerCase().includes(query); item.hidden = !match; if (match) visible += 1; });
+      if (faqCount) faqCount.textContent = `${visible} ${visible === 1 ? 'note' : 'notes'} on the board`;
+      if (faqEmpty) faqEmpty.hidden = visible > 0;
+    };
+    faqSearch?.addEventListener('input', searchFaq);
     const forms = [...document.querySelectorAll('#inquiryForm, form[data-inquiry]')];
     const submit = async event => {
       const form = event.currentTarget;
@@ -128,7 +157,7 @@ function Site() {
       priorScroll = current;
     };
     window.addEventListener('scroll', syncHeader, { passive: true });
-    const revealItems = [...document.querySelectorAll('.section, .page-intro, .detail, .profile-intro, .page-wrap')];
+    const revealItems = [...document.querySelectorAll('.section, .page-intro, .detail, .profile-intro, .page-wrap, .listing-page, .family-page, .gone-page, .contact-letter-section, .faq-page, .guide-nav, .guide-ways, .gone-teaser, .visit-section')];
     revealItems.forEach(item => item.classList.add('motion-reveal'));
     const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }), { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }) : null;
     revealItems.forEach(item => observer ? observer.observe(item) : item.classList.add('is-visible'));
@@ -140,6 +169,8 @@ function Site() {
       document.removeEventListener('click', navigateClick);
       document.removeEventListener('click', faqClick);
       document.removeEventListener('click', filterClick);
+      document.removeEventListener('click', selectWay);
+      faqSearch?.removeEventListener('input', searchFaq);
       forms.forEach(form => form.removeEventListener('submit', submit));
       document.removeEventListener('click', galleryClick);
       document.removeEventListener('keydown', keyClick);
