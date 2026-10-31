@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { renderRoute } from './legacy.js';
 import './styles.css';
@@ -7,6 +7,14 @@ function Site() {
   const location = useLocation();
   const html = renderRoute(location.pathname, location.search);
   const priorPath = useRef(location.pathname);
+  const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem('teddypups-intro-seen'));
+
+  useEffect(() => {
+    if (!showIntro) return;
+    sessionStorage.setItem('teddypups-intro-seen', '1');
+    const timer = window.setTimeout(() => setShowIntro(false), 2050);
+    return () => window.clearTimeout(timer);
+  }, [showIntro]);
 
   useEffect(() => {
     const menu = document.getElementById('menuPanel');
@@ -140,7 +148,23 @@ function Site() {
     };
   }, [location.pathname, location.search]);
 
-  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  return <>
+    <div dangerouslySetInnerHTML={{ __html: html }} />
+    {showIntro && <div className="puppy-intro" aria-hidden="true">
+      <div className="intro-sky"><span>🐾</span><span>🐾</span><span>🐾</span>
+        <svg className="intro-runner" viewBox="0 0 180 130" fill="none">
+          <path className="runner-tail" d="M43 54C22 42 25 19 40 20" stroke="#57301e" strokeWidth="9" strokeLinecap="round"/>
+          <ellipse cx="86" cy="76" rx="49" ry="35" fill="#f6cc87" stroke="#57301e" strokeWidth="5"/>
+          <ellipse cx="130" cy="53" rx="29" ry="27" fill="#f6cc87" stroke="#57301e" strokeWidth="5"/>
+          <path className="runner-ear" d="M111 35C101 9 112 3 127 27" fill="#a9693d" stroke="#57301e" strokeWidth="4" strokeLinejoin="round"/>
+          <ellipse cx="151" cy="60" rx="12" ry="9" fill="#fff4dc" stroke="#57301e" strokeWidth="4"/><circle cx="151" cy="43" r="3.5" fill="#28170f"/><circle cx="160" cy="60" r="2.5" fill="#28170f"/>
+          <g className="runner-leg runner-leg-one"><path d="M61 98L55 119" stroke="#57301e" strokeWidth="9" strokeLinecap="round"/></g>
+          <g className="runner-leg runner-leg-two"><path d="M109 100L115 119" stroke="#57301e" strokeWidth="9" strokeLinecap="round"/></g>
+          <path d="M48 121h15M108 121h15" stroke="#57301e" strokeWidth="8" strokeLinecap="round"/>
+        </svg>
+      </div><div className="intro-blanket"><span>Welcome home, little one</span></div>
+    </div>}
+  </>;
 }
 
 export default function App() {
