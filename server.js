@@ -8,10 +8,11 @@ const dist = path.join(here, 'dist');
 app.use(express.json({ limit: '32kb' }));
 app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'TeddyPups website' }));
 app.post('/api/inquiries', (req, res) => {
-  const { name, phone, email, city, interest, message, website } = req.body || {};
+  const { name, phone, email, city, interest, message, website, formType } = req.body || {};
   if (website) return res.json({ ok: true });
-  if (!name?.trim() || !phone?.trim() || !email?.trim() || !city?.trim() || !interest?.trim()) return res.status(400).json({ error: 'Please fill in your name, phone, email, location and puppy interest.' });
-  if (!/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({ error: 'Please enter a valid email address.' });
+  if (!name?.trim() || !phone?.trim()) return res.status(400).json({ error: 'Please enter your name and phone or WhatsApp number.' });
+  if (formType === 'contact' && (!email?.trim() || !city?.trim() || !interest?.trim())) return res.status(400).json({ error: 'Please complete your email, location and puppy interest.' });
+  if (email && !/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({ error: 'Please enter a valid email address.' });
   // The static clone confirms submitted enquiries locally; it does not send or retain personal information.
   res.status(201).json({ ok: true, received: Boolean(message) });
 });
